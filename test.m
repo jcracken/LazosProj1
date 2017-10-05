@@ -1,1 +1,1 @@
-A = packetgen(50);
+A = packetgen(500);
