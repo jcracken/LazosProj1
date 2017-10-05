@@ -1,5 +1,5 @@
 function out = packetgen(lambda)
-    r = 0 + (0.2).*rand(lambda,1);
+    r = 0 + (1).*rand(lambda,1);
     X = (-1/lambda).*log(1-r);
     Y = ceil(X./0.00002);
     out = zeros(1, lambda);
