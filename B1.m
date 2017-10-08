@@ -54,8 +54,6 @@ while (Acounter <= lambda || Ccounter <= lambda)
         if(Cback > 1024)
             Cback = 1024;
         end
-        Acounter = Acounter + 1; %move onto next event
-        Ccounter = Ccounter + 1;
         timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
     end
     if (A + Aback > C + Cback && C + Cback >= A) %C goes first, A freezes

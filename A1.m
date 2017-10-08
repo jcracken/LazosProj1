@@ -26,6 +26,7 @@ ACK = 2;
 
 frame = 100;
 k = 0; %number of collisions
+n = 0; %temp number of collisions
 timer = 0; %keeps track of real time after collisions and tx's
 
 while (Acounter <= lambda || Ccounter <= lambda)
@@ -47,17 +48,18 @@ while (Acounter <= lambda || Ccounter <= lambda)
     end
     if (A + Aback == C + Cback) %collision!
         k = k + 1; %count up collision counter
-        Aback = Aback * 2; %set new backoff. if hit max backoff, keep it there.
+        n = n + 1;
+        Aback = back(n); %set new backoff. if hit max backoff, keep it there.
         if(Aback > 1024)
             Aback = 1024;
         end
-        Cback = Cback * 2;
+        Cback = back(n);
         if(Cback > 1024)
             Cback = 1024;
         end
-        Acounter = Acounter + 1; %move onto next event
-        Ccounter = Ccounter + 1;
         timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
+    else %reset temp collision counter
+        n = 0;
     end
     if (A + Aback > C + Cback && C + Cback >= A) %C goes first, A freezes
         timer = timer + C + Cback + DIFS + frame + SIFS + ACK; %move time forward
