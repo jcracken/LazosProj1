@@ -35,7 +35,9 @@ timer = 0; %keeps track of real time after collisions and tx's
 while (Acounter <= lambda || Ccounter <= test * lambda)
     if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
         A = 600000;
-        Adone = timer;
+        if(Adone == 0)
+            Adone = timer;
+        end
     else
         if(n == 0)
             A = Ain(Acounter);
@@ -43,7 +45,9 @@ while (Acounter <= lambda || Ccounter <= test * lambda)
     end
     if(Ccounter > test * lambda)
         C = 600000;
-        Cdone = timer;
+        if(Cdone == 0)
+            Cdone = timer;
+        end
     else
         if(n == 0)
             C = Cin(Ccounter);
