@@ -18,6 +18,9 @@ Acounter = 1; %which event we're on
 Ccounter = 1;
 Atx = 0; %number of transmissions each has made
 Ctx = 0;
+Adone = 0; %for thoroughput
+Cdone = 0;
+
 
 DIFS = 2;
 SIFS = 1;
@@ -31,6 +34,7 @@ timer = 0; %keeps track of real time after collisions and tx's
 while (Acounter <= lambda || Ccounter <= lambda)
     if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
         A = 600000;
+        Adone = timer;
     else
         if(n == 0)
             A = Ain(Acounter);
@@ -38,6 +42,7 @@ while (Acounter <= lambda || Ccounter <= lambda)
     end
     if(Ccounter > lambda)
         C = 600000;
+        Cdone = timer;
     else
         if(n == 0)
             C = Cin(Ccounter);
