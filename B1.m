@@ -9,9 +9,10 @@
 %collisions. Calculated upper bound cannot exceeed 1024 slots.
 
 lambda = 300;
+test = 1;
 
 Ain = packetgen(lambda); %events
-Cin = packetgen(lambda);
+Cin = packetgen(test * lambda);
 Aback = 0; %backoff values
 Cback = 0;
 Acounter = 1; %which event we're on
@@ -31,7 +32,7 @@ k = 0; %number of collisions
 n = 0; %temp number of collisions
 timer = 0; %keeps track of real time after collisions and tx's
 
-while (Acounter <= lambda || Ccounter <= lambda)
+while (Acounter <= lambda || Ccounter <= test * lambda)
     if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
         A = 600000;
         Adone = timer;
@@ -40,7 +41,7 @@ while (Acounter <= lambda || Ccounter <= lambda)
             A = Ain(Acounter);
         end
     end
-    if(Ccounter > lambda)
+    if(Ccounter > test * lambda)
         C = 600000;
         Cdone = timer;
     else
