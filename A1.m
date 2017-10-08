@@ -33,12 +33,16 @@ while (Acounter <= lambda || Ccounter <= lambda)
     if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
         A = 600000;
     else
-        A = Ain(Acounter);
+        if(n == 0)
+            A = Ain(Acounter);
+        end
     end
     if(Ccounter > lambda)
         C = 600000;
     else
-        C = Cin(Ccounter);
+        if(n == 0)
+            C = Cin(Ccounter);
+        end
     end
     if(Aback == 0) %assign new backoff value if not already carrying one forward
         Aback = back(0);
@@ -58,6 +62,8 @@ while (Acounter <= lambda || Ccounter <= lambda)
             Cback = 1024;
         end
         timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
+        A = timer;
+        C = timer;
     else %reset temp collision counter
         n = 0;
     end
