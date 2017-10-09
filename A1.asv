@@ -1,11 +1,14 @@
-function out = A2(lambda)
+function out = A1(lambda)
     %A talks to B
     %C talks to D
 
-    %RTS/CTS exchanged before transmission of a frame. If RTS collides,
-    %something something experimental backoff. Otherwise, stations that hear
-    %the RTS/CTS message defer.
-
+    %DIFS of 40 us + random backoff of [1,3] (slots)
+    %If channel busy during DIFS, it freezes and waits for it to become idle.
+    %Decrements counter until it hits zero, freezes when not idle, transmits
+    %once counter hits zero. If no collision, SIFS of 10 us and then ACK. Then
+    %DIFS again and the next transmission starts. If collision, the colliding
+    %stations choose backoff from [0, 2^k * 4 - 1] where k is number of
+    %collisions. Calculated upper bound cannot exceeed 1024 slots.
     test = 1;
 
     Ain = packetgen(lambda); %events
@@ -19,12 +22,9 @@ function out = A2(lambda)
     Adone = 0; %for throughput
     Cdone = 0;
 
-    %length in slots of each event
-    RTS = 2;
-    CTS = 2;
-    ACK = 2;
     DIFS = 2;
     SIFS = 1;
+    ACK = 2;
 
     frame = 100;
     k = 0; %number of collisions
@@ -102,7 +102,5 @@ function out = A2(lambda)
             Atx = Atx + 1;
         end
     end
-    % out format = [A_throughput, C_Throughput, num_collisions,
-    % Fairness_Index
-    out = [1 1 k 1];
-end
+    out = [];
+end 
