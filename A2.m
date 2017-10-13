@@ -101,10 +101,12 @@ function out = A2(lambda, test)
             Atx = Atx + 1;
             A_RTS_TEMP = false;
             B_CTS = false;
+            D_CTS = false;
         elseif(C_RTS == true)
             % do nothing
         elseif(A_RTS == true)
             B_CTS = true;
+            D_CTS = true;
             Atx = Atx + 1;
             Afair = Afair + A + Aback + RTS + frame + CTS + ACK;
         elseif(C + Cback >= A + Aback) % A goes
@@ -126,6 +128,7 @@ function out = A2(lambda, test)
             % do nothing
         elseif(C_RTS == true)
             D_CTS = true;
+            B_CTS = true;
             Ctx = Ctx + 1;
             Cfair = Cfair + C + Cback + RTS + frame + CTS;
         elseif(A + Aback >= C + Cback) % C goes
