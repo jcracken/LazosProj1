@@ -1,11 +1,9 @@
-function out = B2(lambda)
+function out = B2(lambda, test)
     %A and C both talk to B (no collisions?)
 
     %RTS/CTS exchanged before transmission of a frame. If RTS collides,
     %something something experimental backoff. Otherwise, stations that hear
     %the RTS/CTS message defer.
-
-    test = 1;
 
     Ain = packetgen(lambda); %events
     Cin = packetgen(test * lambda);
@@ -30,7 +28,7 @@ function out = B2(lambda)
     n = 0; %temp number of collisions
     timer = 0; %keeps track of real time after collisions and tx's
 
-    while (Acounter <= lambda || Ccounter <= test * lambda)
+    while ((Acounter <= lambda || Ccounter <= lambda*test) && timer < 500000)
         if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
             A = 600000;
             if(Adone == 0)

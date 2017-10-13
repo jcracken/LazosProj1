@@ -1,13 +1,10 @@
-function out = A2(lambda)
+function out = A2(lambda, test)
     %A talks to B
     %C talks to D
 
     %RTS/CTS exchanged before transmission of a frame. If RTS collides,
     %something something experimental backoff. Otherwise, stations that hear
     %the RTS/CTS message defer.
-
-    test = 1;
-
     Ain = packetgen(lambda); %events
     Cin = packetgen(test * lambda);
     Aback = 0; %backoff values
@@ -18,6 +15,8 @@ function out = A2(lambda)
     Ctx = 0;
     Adone = 0; %for throughput
     Cdone = 0;
+    Afair = 0;
+    Cfair = 0;
 
     %length in slots of each event
     RTS = 2;
@@ -25,13 +24,20 @@ function out = A2(lambda)
     ACK = 2;
     DIFS = 2;
     SIFS = 1;
+    
+    A_RTS = false;
+    C_RTS = false;
+    B_CTS = false;
+    D_CTS = false;
+    
 
     frame = 100;
     k = 0; %number of collisions
     n = 0; %temp number of collisions
     timer = 0; %keeps track of real time after collisions and tx's
 
-    while (Acounter <= lambda || Ccounter <= test * lambda)
+    while ((Acounter <= lambda || Ccounter <= lambda*test) && timer < 500000)
+        % Get A Event
         if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
             A = 600000;
             if(Adone == 0)
@@ -42,6 +48,7 @@ function out = A2(lambda)
                 A = Ain(Acounter);
             end
         end
+        % Get C Event
         if(Ccounter > test * lambda)
             C = 600000;
             if(Cdone == 0)
@@ -52,13 +59,18 @@ function out = A2(lambda)
                 C = Cin(Ccounter);
             end
         end
-        if(Aback == 0) %assign new backoff value if not already carrying one forward
+        
+        % Assign new backoff value if not already carrying one forward
+        if(Aback == 0) 
             Aback = back(0);
         end
         if(Cback == 0)
             Cback = back(0);
         end
-        if (A + Aback == C + Cback) %collision!
+        
+        
+        % Here A and C need to check for B_CTS and D_CTS, if so, collision
+        if(A_RTS == true && C_RTS == true)
             k = k + 1; %count up collision counter
             n = n + 1;
             Aback = back(n); %set new backoff. if hit max backoff, keep it there.
@@ -72,37 +84,71 @@ function out = A2(lambda)
             timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
             A = timer;
             C = timer;
-        else %reset temp collision counter
+            Afair = Afair + A + Aback + RTS + frame + CTS;
+            Cfair = Cfair + C + Cback + RTS + frame + CTS;
+            A_RTS = false;
+            C_RTS = false;
+            continue;
+        else 
             n = 0;
         end
-        if (A + Aback > C + Cback && C + Cback >= A) %C goes first, A freezes
-            timer = timer + C + Cback + DIFS + frame + SIFS + ACK; %move time forward
-            Aback = Aback - (C + Cback - A); %adjust backoff to reflect freeze
-            Cback = 0; %reset backoff
-            Ccounter = Ccounter + 1; %move to next event
-            Ctx = Ctx + 1; %number of transmissions goes up
-        end
-        if (A + Aback > C + Cback && A >= C + Cback) %C goes, A hasn't started yet
-            timer = timer + C + Cback + DIFS + frame + SIFS + ACK;
+        % Here A needs to check for B_CTS, if not detected, send RTS
+        A_RTS_TEMP = A_RTS;
+        if(A_RTS == true && B_CTS == true)
+            timer = timer + A + Aback + RTS + frame + CTS + ACK;
+            Aback = 0;
+            Acounter = Acounter + 1;
+            Atx = Atx + 1;
+            A_RTS_TEMP = false;
+            B_CTS = false;
+        elseif(C_RTS == true)
+            % do nothing
+        elseif(A_RTS == true)
+            B_CTS = true;
+            Atx = Atx + 1;
+            Afair = Afair + A + Aback + RTS + frame + CTS + ACK;
+        elseif(C + Cback >= A + Aback) % A goes
+            Acounter = Acounter + 1;
+            A_RTS_TEMP = true;
+            timer = timer + RTS;
+        end    
+        
+        % Here C needs to check for D_CTS, if none, send RTS
+        C_RTS_TEMP = C_RTS;
+        if(C_RTS == true && D_CTS == true)
+            timer = timer + C + Cback + RTS + frame + CTS + ACK;
             Cback = 0;
             Ccounter = Ccounter + 1;
             Ctx = Ctx + 1;
+            C_RTS_TEMP = false;
+            D_CTS = false;
+        elseif(A_RTS == true)
+            % do nothing
+        elseif(C_RTS == true)
+            D_CTS = true;
+            Ctx = Ctx + 1;
+            Cfair = Cfair + C + Cback + RTS + frame + CTS;
+        elseif(A + Aback >= C + Cback) % C goes
+            Ccounter = Ccounter + 1;
+            C_RTS_TEMP = true;
+            timer = timer + RTS;
         end
-        if (C + Cback > A + Aback && C >= A + Aback) %A goes, C hasn't started yet
-            timer = timer + A + Aback + DIFS + frame + SIFS + ACK;
-            Aback = 0;
-            Acounter = Acounter + 1;
-            Atx = Atx + 1;
-        end
-        if (C + Cback > A + Aback && A + Aback >= C) %A goes first, C freezes
-            timer = timer + A + Aback + DIFS + frame + SIFS + ACK;
-            Cback = Cback - (A + Aback - C);
-            Aback = 0;
-            Acounter = Acounter + 1;
-            Atx = Atx + 1;
-        end
+        
+        A_RTS = A_RTS_TEMP;
+        C_RTS = C_RTS_TEMP;
     end
     % out format = [A_throughput, C_Throughput, num_collisions,
     % Fairness_Index
-    out = [1 1 k 1];
+    if(Adone == 0)
+        Athroughput = (Atx * 1500) / timer;
+    else
+        Athroughput = (Atx * 1500) / Adone;
+    end
+    if(Cdone == 0)
+        Cthroughput = (Ctx * 1500) / timer;
+    else
+        Cthroughput = (Ctx * 1500) / Cdone;
+    end
+    fairness = (Afair/(Afair + Cfair))/(Cfair/(Afair + Cfair));
+    out = [Athroughput Cthroughput k fairness];
 end
