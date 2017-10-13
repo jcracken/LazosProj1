@@ -93,7 +93,7 @@ function out = A2(lambda, test)
             n = 0;
         end
         % Here A needs to check for B_CTS, if not detected, send RTS
-        A_RTS_TEMP = A_RTS;
+        A_RTS_TEMP = A_RTS; % temp done so A and C make decisions in "parallel"
         if(A_RTS == true && B_CTS == true)
             timer = timer + A + Aback + RTS + frame + CTS + ACK;
             Aback = 0;
@@ -114,7 +114,7 @@ function out = A2(lambda, test)
         end    
         
         % Here C needs to check for D_CTS, if none, send RTS
-        C_RTS_TEMP = C_RTS;
+        C_RTS_TEMP = C_RTS; % temp done so A and C make decisions in "parallel"
         if(C_RTS == true && D_CTS == true)
             timer = timer + C + Cback + RTS + frame + CTS + ACK;
             Cback = 0;
