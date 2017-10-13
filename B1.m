@@ -181,5 +181,15 @@ function out = B1(lambda)
     end
     % out format = [A_throughput, C_Throughput, num_collisions,
     % Fairness_Index
-    out = [1 1 k 1];
+    if(Adone == 0)
+        Athroughput = (Atx * 1500) / timer;
+    else
+        Athroughput = (Atx * 1500) / Adone;
+    end
+    if(Cdone == 0)
+        Cthroughput = (Ctx * 1500) / timer;
+    else
+        Cthroughput = (Ctx * 1500) / Cdone;
+    end
+    out = [Athroughput Cthroughput k 1];
 end
