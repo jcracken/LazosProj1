@@ -36,9 +36,9 @@ function out = A2(lambda, test)
     n = 0; %temp number of collisions
     timer = 0; %keeps track of real time after collisions and tx's
 
-    while ((Acounter <= lambda || Ccounter <= lambda*test) && timer < 500000)
+    while ((Acounter <= 10*lambda || Ccounter <= 10*lambda*test) && timer < 500000)
         % Get A Event
-        if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
+        if(Acounter > 10*lambda) %get current event. if one runs out of events make them a non-factor
             A = 600000;
             if(Adone == 0)
                 Adone = timer;
@@ -49,7 +49,7 @@ function out = A2(lambda, test)
             end
         end
         % Get C Event
-        if(Ccounter > test * lambda)
+        if(Ccounter > test * 10*lambda)
             C = 600000;
             if(Cdone == 0)
                 Cdone = timer;
