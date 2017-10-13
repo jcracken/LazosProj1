@@ -20,6 +20,8 @@ function out = A1(lambda, test)
     Ctx = 0;
     Adone = 0; %for throughput
     Cdone = 0;
+    Afair = 0;
+    Cfair = 0;
 
     DIFS = 2;
     SIFS = 1;
@@ -71,6 +73,8 @@ function out = A1(lambda, test)
             timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
             A = timer;
             C = timer;
+            Afair = Afair + A + Aback + DIFS + frame + SIFS;
+            Cfair = Cfair + A + Aback + DIFS + frame + SIFS;
         else %reset temp collision counter
             n = 0;
         end
@@ -80,18 +84,21 @@ function out = A1(lambda, test)
             Cback = 0; %reset backoff
             Ccounter = Ccounter + 1; %move to next event
             Ctx = Ctx + 1; %number of transmissions goes up
+            Cfair = Cfair + C + Cback + DIFS + frame + SIFS + ACK;
         end
         if (A + Aback > C + Cback && A >= C + Cback) %C goes, A hasn't started yet
             timer = timer + C + Cback + DIFS + frame + SIFS + ACK;
             Cback = 0;
             Ccounter = Ccounter + 1;
             Ctx = Ctx + 1;
+            Cfair = Cfair + C + Cback + DIFS + frame + SIFS + ACK;
         end
         if (C + Cback > A + Aback && C >= A + Aback) %A goes, C hasn't started yet
             timer = timer + A + Aback + DIFS + frame + SIFS + ACK;
             Aback = 0;
             Acounter = Acounter + 1;
             Atx = Atx + 1;
+            Afair = Afair + A + Aback + DIFS + frame + SIFS + ACK;
         end
         if (C + Cback > A + Aback && A + Aback >= C) %A goes first, C freezes
             timer = timer + A + Aback + DIFS + frame + SIFS + ACK;
@@ -99,6 +106,7 @@ function out = A1(lambda, test)
             Aback = 0;
             Acounter = Acounter + 1;
             Atx = Atx + 1;
+            Afair = Afair + A + Aback + DIFS + frame + SIFS + ACK;
         end
     end
     % out format = [A_throughput, C_Throughput, num_collisions,
@@ -113,5 +121,6 @@ function out = A1(lambda, test)
     else
         Cthroughput = (Ctx * 1500) / Cdone;
     end
-    out = [Athroughput Cthroughput k 1];
+    fairness = (Afair/(Afair + Cfair))/(Cfair/(Afair + Cfair));
+    out = [Athroughput Cthroughput k fairness];
 end 

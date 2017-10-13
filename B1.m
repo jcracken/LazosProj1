@@ -19,6 +19,8 @@ function out = B1(lambda, test)
     Ctx = 0;
     Adone = 0; %for throughput
     Cdone = 0;
+    Afair = 0;
+    Cfair = 0;
 
     %length in slots of each event
     DIFS = 2;
@@ -71,30 +73,8 @@ function out = B1(lambda, test)
             timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
             A = timer;
             C = timer;
-        end
-        timerold = timer;
-        timer = timer + C + Cback + DIFS + frame + SIFS;
-        C = timer;
-        timer = timerold + A + Aback + DIFS + frame + SIFS; %move time forward
-        A = timer;
-    end
-    if (A + Aback > C + Cback && A >= C + Cback) %C goes, A hasn't started yet
-        if(A + Aback + DIFS < C + Cback + DIFS + frame) %collision
-            k = k + 1; %count up collision counter
-            n = n + 1;
-            Aback = back(n); %set new backoff. if hit max backoff, keep it there.
-            if(Aback > 1024)
-                Aback = 1024;
-            end
-            Cback = back(n);
-            if(Cback > 1024)
-                Cback = 1024;
-            end
-            timerold = timer;
-            timer = timer + C + Cback + DIFS + frame + SIFS;
-            C = timer;
-            timer = timerold + A + Aback + DIFS + frame + SIFS;
-            A = timer;
+            Afair = Afair + A + Aback + DIFS + frame + SIFS;
+            Cfair = Cfair + A + Aback + DIFS + frame + SIFS;
         end
         if (A + Aback > C + Cback && A >= C + Cback) %C goes, A hasn't started yet
             if(A + Aback + DIFS < C + Cback + DIFS + frame) %collision
@@ -112,6 +92,7 @@ function out = B1(lambda, test)
                 C = timer;
                 timer = timer + A + Aback + DIFS + frame + SIFS;
                 A = timer;
+                Afair = Afair + A + Aback + DIFS + frame + SIFS;
             else
                 n = 0;
                 timer = timer + C + Cback + DIFS + frame + SIFS + ACK;
@@ -136,12 +117,14 @@ function out = B1(lambda, test)
                 A = timer;
                 timer = timer + C + Cback + DIFS + frame + SIFS; 
                 C = timer;
+                Afair = Afair + A + Aback + DIFS + frame + SIFS;
              else
                 n = 0;
                 timer = timer + A + Aback + DIFS + frame + SIFS + ACK;
                 Aback = 0;
                 Acounter = Acounter + 1;
                 Atx = Atx + 1;
+                Afair = Afair + A + Aback + DIFS + frame + SIFS;
              end
         end
         if (C + Cback > A + Aback && A + Aback >= C) %A goes first, C collides
@@ -160,22 +143,13 @@ function out = B1(lambda, test)
             A = timer;
             timer = timerold + C + Cback + DIFS + frame + SIFS; 
             C = timer;
+            Afair = Afair + A + Aback + DIFS + frame + SIFS;
         end
         if (n >= 9) %not gonna work, toss the events and move on
             n = 0;
             Acounter = Acounter + 1;
             Ccounter = Ccounter + 1;
         end
-        timerold = timer;
-        timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
-        A = timer;
-        timer = timerold + C + Cback + DIFS + frame + SIFS;
-        C = timer;
-    end
-    if (n >= 9) %not gonna work, toss the events and move on
-        n = 0;
-        Acounter = Acounter + 1;
-        Ccounter = Ccounter + 1;
     end
     % out format = [A_throughput, C_Throughput, num_collisions,
     % Fairness_Index
@@ -189,5 +163,6 @@ function out = B1(lambda, test)
     else
         Cthroughput = (Ctx * 1500) / Cdone;
     end
-    out = [Athroughput Cthroughput k 1];
+    fairness = 
+    out = [Athroughput Cthroughput k fairness];
 end
