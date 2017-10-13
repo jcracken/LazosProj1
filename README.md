@@ -1,2 +1,2 @@
 # LazosProj1
-Project 1 for 478 578
+blood for the blood god
