@@ -29,7 +29,7 @@ function out = B2(lambda, test)
     C_RTS = false;
     B_CTS = false;
     
-    
+
     frame = 100;
     k = 0; %number of collisions
     n = 0; %temp number of collisions
@@ -92,7 +92,7 @@ function out = B2(lambda, test)
             n = 0;
         end
         % Here A needs to check for B_CTS, if not detected, send RTS
-        % A cannot sense an RTS from C, so it is limited in that regard.
+        % A cannot 
         A_RTS_TEMP = A_RTS; % temp done so A and C make decisions in "parallel"
         if(A_RTS == true && B_CTS == true)
             timer = timer + A + Aback + RTS + frame + CTS + ACK;
@@ -101,6 +101,8 @@ function out = B2(lambda, test)
             Atx = Atx + 1;
             A_RTS_TEMP = false;
             B_CTS = false;
+        elseif(C_RTS == true)
+            % do nothing
         elseif(A_RTS == true)
             B_CTS = true;
             Atx = Atx + 1;
@@ -120,6 +122,8 @@ function out = B2(lambda, test)
             Ctx = Ctx + 1;
             C_RTS_TEMP = false;
             B_CTS = false;
+        elseif(A_RTS == true)
+            % do nothing
         elseif(C_RTS == true)
             B_CTS = true;
             Ctx = Ctx + 1;
