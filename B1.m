@@ -1,4 +1,4 @@
-function out = B1(lambda)
+function out = B1(lambda, test)
     %A and C both talk to B (no collisions?)
 
     %DIFS of 40 us + random backoff of [1,3] (slots)
@@ -8,8 +8,6 @@ function out = B1(lambda)
     %DIFS again and the next transmission starts. If collision, the colliding
     %stations choose backoff from [0, 2^k * 4 - 1] where k is number of
     %collisions. Calculated upper bound cannot exceeed 1024 slots.
-
-    test = 1;
 
     Ain = packetgen(lambda); %events
     Cin = packetgen(test * lambda);
@@ -32,7 +30,7 @@ function out = B1(lambda)
     n = 0; %temp number of collisions
     timer = 0; %keeps track of real time after collisions and tx's
 
-    while (Acounter <= lambda || Ccounter <= test * lambda)
+    while ((Acounter <= lambda || Ccounter <= test * lambda) && timer < 500000)
         if(Acounter > lambda) %get current event. if one runs out of events make them a non-factor
             A = 600000;
             if(Adone == 0)
