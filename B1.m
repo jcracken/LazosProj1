@@ -149,6 +149,25 @@ function out = B1(lambda, test)
             Afair = Afair + A + Aback + DIFS + frame + SIFS;
             Cfair = Cfair + C + Cback + DIFS + frame + SIFS;
         end
+        if (A + Aback > C + Cback && C + Cback >= A) %C goes first, A collides
+            k = k + 1; %count up collision counter
+            n = n + 1;
+            Aback = back(n); %set new backoff. if hit max backoff, keep it there.
+            if(Aback > 1024)
+                Aback = 1024;
+            end
+            Cback = back(n);
+            if(Cback > 1024)
+                Cback = 1024;
+            end
+            timerold = timer;
+            timer = timer + A + Aback + DIFS + frame + SIFS;
+            A = timer;
+            timer = timerold + C + Cback + DIFS + frame + SIFS; 
+            C = timer;
+            Afair = Afair + A + Aback + DIFS + frame + SIFS;
+            Cfair = Cfair + C + Cback + DIFS + frame + SIFS;
+        end
         if (n >= 9) %not gonna work, toss the events and move on
             n = 0;
             Acounter = Acounter + 1;
