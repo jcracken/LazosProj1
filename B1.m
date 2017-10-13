@@ -93,12 +93,14 @@ function out = B1(lambda, test)
                 timer = timer + A + Aback + DIFS + frame + SIFS;
                 A = timer;
                 Afair = Afair + A + Aback + DIFS + frame + SIFS;
+                Cfair = Cfair + C + Cback + DIFS + frame + SIFS;
             else
                 n = 0;
                 timer = timer + C + Cback + DIFS + frame + SIFS + ACK;
                 Cback = 0;
                 Ccounter = Ccounter + 1;
                 Ctx = Ctx + 1;
+                Cfair = Cfair + C + Cback + DIFS + frame + SIFS;
             end
         end
         if (C + Cback > A + Aback && C >= A + Aback) %A goes, C hasn't started yet
@@ -118,6 +120,7 @@ function out = B1(lambda, test)
                 timer = timer + C + Cback + DIFS + frame + SIFS; 
                 C = timer;
                 Afair = Afair + A + Aback + DIFS + frame + SIFS;
+                Cfair = Cfair + C + Cback + DIFS + frame + SIFS;
              else
                 n = 0;
                 timer = timer + A + Aback + DIFS + frame + SIFS + ACK;
@@ -138,12 +141,13 @@ function out = B1(lambda, test)
             if(Cback > 1024)
                 Cback = 1024;
             end
-            tiimerold = timer;
+            timerold = timer;
             timer = timer + A + Aback + DIFS + frame + SIFS;
             A = timer;
             timer = timerold + C + Cback + DIFS + frame + SIFS; 
             C = timer;
             Afair = Afair + A + Aback + DIFS + frame + SIFS;
+            Cfair = Cfair + C + Cback + DIFS + frame + SIFS;
         end
         if (n >= 9) %not gonna work, toss the events and move on
             n = 0;
@@ -163,6 +167,6 @@ function out = B1(lambda, test)
     else
         Cthroughput = (Ctx * 1500) / Cdone;
     end
-    fairness = 
+    fairness = (Afair/(Afair + Cfair))/(Cfair/(Afair + Cfair));
     out = [Athroughput Cthroughput k fairness];
 end
