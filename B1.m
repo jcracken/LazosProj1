@@ -85,9 +85,10 @@ while (Acounter <= lambda || Ccounter <= test * lambda)
         if(Cback > 1024)
             Cback = 1024;
         end
+        timerold = timer;
         timer = timer + C + Cback + DIFS + frame + SIFS;
         C = timer;
-        timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
+        timer = timerold + A + Aback + DIFS + frame + SIFS; %move time forward
         A = timer;
     end
     if (A + Aback > C + Cback && A >= C + Cback) %C goes, A hasn't started yet
@@ -102,9 +103,10 @@ while (Acounter <= lambda || Ccounter <= test * lambda)
             if(Cback > 1024)
                 Cback = 1024;
             end
+            timerold = timer;
             timer = timer + C + Cback + DIFS + frame + SIFS;
             C = timer;
-            timer = timer + A + Aback + DIFS + frame + SIFS;
+            timer = timerold + A + Aback + DIFS + frame + SIFS;
             A = timer;
         else
             n = 0;
@@ -126,9 +128,10 @@ while (Acounter <= lambda || Ccounter <= test * lambda)
             if(Cback > 1024)
                 Cback = 1024;
             end
+            tiimerold = timer;
             timer = timer + A + Aback + DIFS + frame + SIFS;
             A = timer;
-            timer = timer + C + Cback + DIFS + frame + SIFS; 
+            timer = timerold + C + Cback + DIFS + frame + SIFS; 
             C = timer;
          else
             n = 0;
@@ -149,9 +152,10 @@ while (Acounter <= lambda || Ccounter <= test * lambda)
         if(Cback > 1024)
             Cback = 1024;
         end
+        timerold = timer;
         timer = timer + A + Aback + DIFS + frame + SIFS; %move time forward
         A = timer;
-        timer = timer + C + Cback + DIFS + frame + SIFS;
+        timer = timerold + C + Cback + DIFS + frame + SIFS;
         C = timer;
     end
     if (n >= 9) %not gonna work, toss the events and move on
